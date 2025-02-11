@@ -37,6 +37,9 @@
                 {% if perms.security.view_policyversion %}
                 <a class="btn btn-primary" href="{% url 'view_policy_version' policy_version.pk %}">View</a>
                 {% endif %}
+                {% if perms.security.change_policy %}
+                <a class="btn btn-outline-dark" href="{% url 'rollback_policy_version' policy_version.pk %}">Rollback</a>
+                {% endif %}
             </form>
         </div>
     </div>

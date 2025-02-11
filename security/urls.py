@@ -14,4 +14,5 @@ urlpatterns = [
     path('policy/<int:pk>/policy-version-list', views.view_policy_versions, name='view_policy_versions'),
     path('view-policy-version/<int:pk>', views.view_policy_version, name='view_policy_version'),
     path('edit-policy-version/<int:pk>', views.edit_policy_version, name='edit_policy_version'),
+    path('rollback-policy-version/<int:pk>', views.rollback_policy_version, name='rollback_policy_version'),
 ]

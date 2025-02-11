@@ -255,3 +255,18 @@ def edit_policy_version(request, pk):
         }
     
     return render(request, 'security/edit_policy_version.html', {"form": form})
+
+@login_required(login_url="/login")
+@permission_required("security.change_policy", login_url="/access-denied")
+def rollback_policy_version(request, pk):
+    policy_version = PolicyVersion.objects.get(id=pk)
+    policy = policy_version.policy
+    policy.title = policy_version.title
+    policy.content = policy_version.content
+    policy.risks.remove(*policy.risks.all())
+    policy.risks.add(*policy_version.risks.all())
+    policy.compliance_standards.remove(*policy.compliance_standards.all())
+    policy.compliance_standards.add(*policy_version.compliance_standards.all())
+    policy.save()
+    messages.success(request, "The policy has been rolled back to this policy version.")
+    return redirect("view_policy_versions", pk=policy.id)
