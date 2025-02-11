@@ -1,0 +1,43 @@
+{% extends 'main/base.html' %}
+{% block title %}View Compliance Standards{% endblock %}
+{% block content %}
+<div class="text-end">
+    <a class="btn btn-success" href="/create-compliance-standard">Create New Compliance Standard</a>
+</div>
+<br/>
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <span{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    {% endfor %}
+{% endif %}
+{% for compliance_standard in compliance_standards %}
+<div class="card mt-2">
+    <div class="card-body d-flex flex-row justify-content-between">
+        <div class="card-title">
+            <h5>{{ compliance_standard.name }}</h5>
+            <span style="white-space: pre-line">{{ compliance_standard.description }}</span>
+            <br/>
+            <a style="white-space: pre-line" target="_blank" href="{{ compliance_standard.reference_url }}">{{ compliance_standard.reference_url }}</a>
+        </div>
+        <div>
+            <form method="post">
+                {% csrf_token %}
+                {% if perms.security.delete_risk %}
+                <button type="submit" class="btn btn-danger" name="compliance-standard-id-delete" value="{{compliance_standard.id}}">Delete</button>
+                {% endif %}
+                {% if perms.security.change_risk %}
+                <a class="btn btn-warning" href="{% url 'edit_compliance_standard' compliance_standard.pk %}">Edit</a>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+    <div class="card-footer">Last Updated at: {{ compliance_standard.updated_at }}</div>
+</div>
+<br/>
+{% empty %}
+<p>No compliance standards available.</p>
+{% endfor %}
+{% endblock %}

@@ -31,6 +31,11 @@
                         <a class="nav-link" href="/risk-list">Risks</a>
                     </li>
                     {% endif %}
+                    {% if perms.security.view_compliancestandard %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="/compliance-standard-list">Compliance Standards</a>
+                    </li>
+                    {% endif %}
                 </ul>
             </div>
             <div>

@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
-from .forms import PolicyForm, RiskForm, PolicyVersionForm
+from .forms import PolicyForm, RiskForm, PolicyVersionForm, ComplianceStandardForm
 from django.contrib.auth.decorators import login_required, permission_required
-from .models import Policy, Risk, PolicyVersion
+from .models import Policy, Risk, PolicyVersion, ComplianceStandard
 from django.contrib import messages
 
 # Create your views here.
@@ -30,6 +30,8 @@ def create_policy_version(policy: Policy, request):
     new_policy_version.save()
     related_risks = Risk.objects.filter(policy = policy.id)
     new_policy_version.risks.add(*related_risks)
+    related_compliance_standards = ComplianceStandard.objects.filter(policy = policy.id)
+    new_policy_version.compliance_standards.add(*related_compliance_standards)
     new_policy_version.save()
     policy.version_count = policy.version_count + 1
     policy.save()
@@ -44,6 +46,16 @@ def check_policy_risks_changes(policy: Policy, related_risks_ids, request, polic
 
         if policy_version:
             policy_version.risks.add(*policy.risks.all())
+
+def check_policy_compliance_standards_changes(policy: Policy, related_compliance_standards_ids, request, policy_version):
+    current_related_compliance_standards_ids = [compliance_standard.id for compliance_standard in policy.compliance_standards.all()]
+    if (set(related_compliance_standards_ids) != set(current_related_compliance_standards_ids)):
+        if policy_version == False:
+            create_policy_version(policy, request)
+            messages.success(request, "A new version of the policy has been created.")
+
+        if policy_version:
+            policy_version.compliance_standards.add(*policy.compliance_standards.all())
 
 @login_required(login_url="/login")
 @permission_required("security.add_policy", login_url="/access-denied")
@@ -71,12 +83,14 @@ def edit_policy(request, pk):
         form = PolicyForm(request.POST, instance=policy)
         if form.is_valid():
             related_risks_ids = [risk.id for risk in Risk.objects.filter(policy = policy.id)]
+            related_compliance_standards_ids = [compliance_standard.id for compliance_standard in ComplianceStandard.objects.filter(policy = policy.id)]
             if policy.tracker.changed():
                 policy_version = create_policy_version(policy, request)
                 messages.success(request, "A new version of the policy has been created.")
                 created_version = True
             form.save()
             check_policy_risks_changes(policy, related_risks_ids, request, policy_version)
+            check_policy_compliance_standards_changes(policy, related_compliance_standards_ids, request, policy_version)
             messages.success(request, "The policy was edited successfully.")
             return redirect("/policy-list")
     else:
@@ -140,6 +154,62 @@ def edit_risk(request, pk):
         }
     
     return render(request, 'security/edit_risk.html', {"form": form})
+
+@login_required(login_url="/login")
+@permission_required(["security.view_compliancestandard", "security.delete_compliancestandard"], login_url="/access-denied")
+def view_compliance_standard(request):
+    compliance_standards = ComplianceStandard.objects.all()
+    
+    if request.method == "POST":
+        compliance_standard_id_delete = request.POST.get("compliance-standard-id-delete")
+        compliance_standard_id_edit = request.POST.get("compliance-standard-id-edit")
+        if compliance_standard_id_delete:
+            compliance_standard = ComplianceStandard.objects.filter(id=compliance_standard_id_delete).first()
+            if compliance_standard:
+                compliance_standard.delete()
+                messages.success(request, "The compliance standard was deleted successfully.")
+        else:
+            compliance_standard = Policy.objects.filter(id=compliance_standard_id_edit).first()
+            return redirect("/edit-compliance-standard", pk=compliance_standard.id)
+
+
+    return render(request, 'security/list_compliance_standard.html', {"compliance_standards": compliance_standards})
+
+@login_required(login_url="/login")
+@permission_required("security.add_compliancestandard", login_url="/access-denied")
+def create_compliance_standard(request):
+    if request.method == 'POST':
+        form = ComplianceStandardForm(request.POST)
+        if form.is_valid():
+            compliance_standard = form.save(commit=False)
+            if compliance_standard.reference_url[:8] != "https://": compliance_standard.reference_url = "https://" + compliance_standard.reference_url
+            form.save()
+            messages.success(request, "The compliance standard was created successfully.")
+            return redirect("/compliance-standard-list")
+    else:
+        form = ComplianceStandardForm()
+    
+    return render(request, 'security/create_compliance_standard.html', {"form": form})
+
+@login_required(login_url="/login")
+@permission_required("security.change_compliancestandard", login_url="/access-denied")
+def edit_compliance_standard(request, pk):
+    compliance_standard = ComplianceStandard.objects.get(id=pk)
+    if request.method == 'POST':
+        form = ComplianceStandardForm(request.POST, instance=compliance_standard)
+        if form.is_valid():
+            compliance_standard = form.save(commit=False)
+            if compliance_standard.reference_url[:8] != "https://": compliance_standard.reference_url = "https://" + compliance_standard.reference_url
+            form.save()
+            messages.success(request, "The compliance standard was edited successfully.")
+            return redirect("/compliance-standard-list")
+    else:
+        form = ComplianceStandardForm(instance=compliance_standard)
+        context = {
+            'form': form,
+        }
+    
+    return render(request, 'security/edit_compliance_standard.html', {"form": form})
 
 @login_required(login_url="/login")
 @permission_required(["security.view_policyversion", "security.delete_policyversion"], login_url="/access-denied")

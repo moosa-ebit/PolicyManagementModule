@@ -4,6 +4,14 @@ from django.contrib.auth.models import User
 from model_utils import FieldTracker
 
 # Create your models here.    
+class ComplianceStandard(models.Model):
+    name = models.CharField(max_length=100)
+    description = models.TextField(max_length=250)
+    reference_url = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
+
 class Risk(models.Model):
     Severity_Levels = [
         ("LOW", "Low"),
@@ -37,6 +45,7 @@ class Policy(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     risks = models.ManyToManyField(Risk)
+    compliance_standards = models.ManyToManyField(ComplianceStandard)
     tracker = FieldTracker()
     version_count = models.IntegerField(default=0)
 
@@ -52,6 +61,7 @@ class PolicyVersion(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     notes = models.TextField(max_length=250, default="")
     risks = models.ManyToManyField(Risk)
+    compliance_standards = models.ManyToManyField(ComplianceStandard)
 
     def __str__(self):
         return self.policy.title + "-" + str(self.version_number) 
