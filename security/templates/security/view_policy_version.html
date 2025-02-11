@@ -1,0 +1,29 @@
+{% extends 'main/base.html' %}
+{% block title %}View Policy Version{% endblock %}
+{% load crispy_forms_tags %}
+{% block content %}
+<div class="form-group">
+    <div class="mb-3">
+        <label class="form-label">Title</label>
+        <input class="form-control" value="{{ policy_version.title }}" readonly>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Content</label>
+        <textarea class="textarea form-control" rows="10" cols="40" readonly>{{ policy_version.content }}</textarea>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Version Number</label>
+        <br/><span class="badge rounded-pill text-left version-badge">Version {{policy_version.version_number}}</span>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Risks</label><br/>
+        {% for risk in policy_version.risks.all %}
+        <span class="badge rounded-pill {{risk.get_severity_display.lower}}-severity">{{risk.name}}</span>
+        {% endfor %}
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Notes</label>
+        <textarea class="textarea form-control" rows="10" cols="40" readonly>{{ policy_version.notes }}</textarea>
+    </div>
+</div>
+{% endblock %}

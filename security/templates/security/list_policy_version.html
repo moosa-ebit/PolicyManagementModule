@@ -1,0 +1,49 @@
+{% extends 'main/base.html' %}
+{% block title %}View Policy Versions{% endblock %}
+{% block content %}
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <span{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    {% endfor %}
+{% endif %}
+{% for policy_version in policy_versions %}
+<div class="card mt-2">
+    <div class="card-header">
+        <div class="row">
+            <div class="col-md-6"><span class="badge rounded-pill text-left version-badge">Version {{policy_version.version_number}}</span></div>
+            <div class="text-end col-md-6">Created by: <strong>{{ policy_version.created_by.first_name }} {{ policy_version.created_by.last_name }}</strong></div>
+        </div>
+    </div>
+    <div class="card-body d-flex flex-row justify-content-between">
+        <div class="card-title">
+            <h5>{{ policy_version.title }}</h5>
+            <span>Risks: </span>
+            {% for risk in policy_version.risks.all %}
+                <span class="badge rounded-pill {{risk.get_severity_display.lower}}-severity">{{risk.name}}</span>
+            {% endfor %}
+        </div>
+        <div>
+            <form method="post">
+                {% csrf_token %}
+                {% if perms.security.delete_policyversion %}
+                <button type="submit" class="btn btn-danger" name="policy-version-id-delete" value="{{policy_version.id}}">Delete</button>
+                {% endif %}
+                {% if perms.security.change_policyversion %}
+                <a class="btn btn-outline-primary" href="{% url 'edit_policy_version' policy_version.pk %}">Add Note</a>
+                {% endif %}
+                {% if perms.security.view_policyversion %}
+                <a class="btn btn-primary" href="{% url 'view_policy_version' policy_version.pk %}">View</a>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+    <div class="card-footer">Created at: {{ policy_version.created_at }}</div>
+</div>
+<br/>
+{% empty %}
+<p>No policy versions available.</p>
+{% endfor %}
+{% endblock %}

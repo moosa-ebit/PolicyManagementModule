@@ -1,0 +1,19 @@
+.low-severity {
+    background-color: #34C759;
+}
+
+.medium-severity {
+    background-color: #FFCC00;
+}
+
+.high-severity {
+    background-color: #FF9500;
+}
+
+.critical-severity {
+    background-color: #FF3B30;
+}
+
+.version-badge {
+    background-color: #493D9E;
+}

@@ -1,0 +1,49 @@
+{% extends 'main/base.html' %}
+{% block title %}View Policies{% endblock %}
+{% block content %}
+<div class="text-end">
+    <a class="btn btn-success" href="/create-policy">Create New Policy</a>
+</div>
+<br/>
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <span{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    {% endfor %}
+{% endif %}
+{% for policy in policies %}
+<div class="card mt-2">
+    <div class="card-header text-end">Created by: <strong>{{ policy.created_by.first_name }} {{ policy.created_by.last_name }}</strong></div>
+    <div class="card-body d-flex flex-row justify-content-between">
+        <div class="card-title">
+            <h5>{{ policy.title }}</h5>
+            <span>Risks: </span>
+            {% for risk in policy.risks.all %}
+                <span class="badge rounded-pill {{risk.get_severity_display.lower}}-severity">{{risk.name}}</span>
+            {% endfor %}
+        </div>
+        <div>
+            <form method="post">
+                {% csrf_token %}
+                {% if perms.security.delete_policy %}
+                <button type="submit" class="btn btn-danger" name="policy-id-delete" value="{{policy.id}}">Delete</button>
+                {% endif %}
+                {% if perms.security.change_policy %}
+                <a class="btn btn-warning" href="{% url 'edit_policy' policy.pk %}">Edit</a>
+                {% endif %}
+                {% if perms.security.view_policyversion %}
+                <a class="btn btn-primary" href="{% url 'view_policy_versions' policy.pk %}">View Versions</a>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+    <div class="card-footer">Created at: {{ policy.created_at }}</div>
+    <div class="card-footer">Last Updated at: {{ policy.updated_at }}</div>
+</div>
+<br/>
+{% empty %}
+<p>No policies available.</p>
+{% endfor %}
+{% endblock %}

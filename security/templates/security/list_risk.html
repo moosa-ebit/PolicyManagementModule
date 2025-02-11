@@ -1,0 +1,44 @@
+{% extends 'main/base.html' %}
+{% block title %}View Risks{% endblock %}
+{% block content %}
+<div class="text-end">
+    <a class="btn btn-success" href="/create-risk">Create New Risk</a>
+</div>
+<br/>
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <span{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    {% endfor %}
+{% endif %}
+{% for risk in risks %}
+<div class="card mt-2">
+    <div class="card-body d-flex flex-row justify-content-between">
+        <div class="card-title">
+            <h5>{{ risk.name }}</h5>
+            <span style="white-space: pre-line">{{ risk.description }}</span>
+            <br/>
+            <span style="white-space: pre-line">Severity: </span>
+            <span class="badge rounded-pill {{risk.get_severity_display.lower}}-severity">{{risk.get_severity_display}}</span>
+        </div>
+        <div>
+            <form method="post">
+                {% csrf_token %}
+                {% if perms.security.delete_risk %}
+                <button type="submit" class="btn btn-danger" name="risk-id-delete" value="{{risk.id}}">Delete</button>
+                {% endif %}
+                {% if perms.security.change_risk %}
+                <a class="btn btn-warning" href="{% url 'edit_risk' risk.pk %}">Edit</a>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+    <div class="card-footer">Last Updated at: {{ risk.updated_at }}</div>
+</div>
+<br/>
+{% empty %}
+<p>No risks available.</p>
+{% endfor %}
+{% endblock %}
