@@ -21,19 +21,20 @@
                             <a class="nav-link" href="{% url 'admin:index' %}">Admin Panel</a>
                         </li>
                     {% endif %}
-                    {% if perms.security.view_policy %}
+                    {% if user.groups.all.0.name == 'Manager' %}
                     <li class="nav-item">
                         <a class="nav-link" href="/policy-list">Policies</a>
                     </li>
-                    {% endif %}
-                    {% if perms.security.view_risk %}
                     <li class="nav-item">
                         <a class="nav-link" href="/risk-list">Risks</a>
                     </li>
-                    {% endif %}
-                    {% if perms.security.view_compliancestandard %}
                     <li class="nav-item">
                         <a class="nav-link" href="/compliance-standard-list">Compliance Standards</a>
+                    </li>
+                    {% endif %}
+                    {% if user.groups.all.0.name == 'Employee' %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="/view-policy-acknowledgment">Acknowledge Policies</a>
                     </li>
                     {% endif %}
                 </ul>

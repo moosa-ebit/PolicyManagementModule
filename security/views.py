@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from .forms import PolicyForm, RiskForm, PolicyVersionForm, ComplianceStandardForm
 from django.contrib.auth.decorators import login_required, permission_required
-from .models import Policy, Risk, PolicyVersion, ComplianceStandard
+from .models import Policy, Risk, PolicyVersion, ComplianceStandard, PolicyAcknowledgment
 from django.contrib import messages
 
 # Create your views here.
@@ -66,6 +66,7 @@ def create_policy(request):
             policy = form.save(commit=False)
             policy.created_by = request.user
             policy.save()
+            form.save_m2m()
             create_policy_version(policy, request)
             messages.success(request, "The policy was created successfully.")
             return redirect("/policy-list")
@@ -270,3 +271,35 @@ def rollback_policy_version(request, pk):
     policy.save()
     messages.success(request, "The policy has been rolled back to this policy version.")
     return redirect("view_policy_versions", pk=policy.id)
+
+@login_required(login_url="/login")
+@permission_required(["security.view_policyacknowledgment", "security.change_policyacknowledgment"], login_url="/access-denied")
+def view_policy_acknowledgment(request):
+    if request.method == "POST":
+        policy_id_acknowledge = request.POST.get("policy-id-acknowledge")
+        policy_id_view = request.POST.get("policy-id-view")
+        if policy_id_acknowledge:
+            policy = Policy.objects.filter(id=policy_id_acknowledge).first()
+            if policy:
+                new_policy_acknowledgment = PolicyAcknowledgment(policy = policy, user = request.user)
+                new_policy_acknowledgment.save()
+                messages.success(request, "You have successfully acknowledged the policy.")
+        else:
+            policy = Policy.objects.filter(id=policy_id_view).first()
+            return redirect("view_policy", pk=policy.id)
+
+    acknowledged_policies = [policy_acknowledgment.policy for policy_acknowledgment in PolicyAcknowledgment.objects.filter(user = request.user)]
+    unacknowledged_policies = Policy.objects.exclude(id__in=[policy.id for policy in acknowledged_policies])
+    return render(request, 'security/list_policy_acknowledgment.html', {"unacknowledged_policies": unacknowledged_policies, "acknowledged_policies": acknowledged_policies})
+
+@login_required(login_url="/login")
+@permission_required("security.view_policyacknowledgment", login_url="/access-denied")
+def view_policy(request, pk):
+    policy = Policy.objects.get(id=pk)
+    return render(request, 'security/view_policy.html', {"policy": policy})
+
+@login_required(login_url="/login")
+@permission_required("security.view_policyacknowledgment", login_url="/access-denied")
+def view_policy_acknowledgments(request, pk):
+    policy_acknowledgments = PolicyAcknowledgment.objects.filter(policy = pk).order_by('-acknowledged_at')
+    return render(request, 'security/list_related_policy_acknowledgment.html', {"policy_acknowledgments": policy_acknowledgments})

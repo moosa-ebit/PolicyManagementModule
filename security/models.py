@@ -8,6 +8,7 @@ class ComplianceStandard(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField(max_length=250)
     reference_url = models.CharField(max_length=100)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.name
@@ -65,3 +66,8 @@ class PolicyVersion(models.Model):
 
     def __str__(self):
         return self.policy.title + "-" + str(self.version_number) 
+    
+class PolicyAcknowledgment(models.Model):
+    policy = models.ForeignKey(Policy, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    acknowledged_at = models.DateTimeField(auto_now_add=True)

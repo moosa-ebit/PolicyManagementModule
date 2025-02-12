@@ -1,0 +1,44 @@
+{% extends 'main/base.html' %}
+{% block title %}View Policy Version{% endblock %}
+{% load crispy_forms_tags %}
+{% block content %}
+<div class="form-group">
+    <div class="mb-3">
+        <label class="form-label">Title</label>
+        <input class="form-control" value="{{ policy.title }}" readonly>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Content</label>
+        <textarea class="textarea form-control" rows="10" cols="40" readonly>{{ policy.content }}</textarea>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Version Number</label>
+        <br/><span class="badge rounded-pill text-left version-badge">Version {{policy.version_number}}</span>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Risks</label><br/>
+        {% for risk in policy.risks.all %}
+        <span class="badge rounded-pill {{risk.get_severity_display.lower}}-severity">{{risk.name}}</span>
+        {% endfor %}
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Compliance Standards</label><br/>
+        <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Description</th>
+              </tr>
+            </thead>
+            <tbody>
+            {% for compliance_standard in policy.compliance_standards.all %}
+                <tr>
+                    <td><a target="_blank" href="{{ compliance_standard.reference_url }}">{{compliance_standard.name}}</a></td>
+                    <td>{{ compliance_standard.description }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+          </table>
+    </div>
+</div>
+{% endblock %}

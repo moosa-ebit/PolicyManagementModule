@@ -1,0 +1,18 @@
+{% extends 'main/base.html' %}
+{% block title %}View Policies{% endblock %}
+{% block content %}
+{% for policy_acknowledgment in policy_acknowledgments %}
+<div class="card mt-2">
+    <div class="card-body d-flex flex-row justify-content-between">
+        <div class="card-title">
+            <h5>Acknowledged by:</h5>
+            <strong>{{ policy_acknowledgment.user.first_name }} {{ policy_acknowledgment.user.last_name }}</strong>
+        </div>
+    </div>
+    <div class="card-footer">Acknowledged at: {{ policy_acknowledgment.acknowledged_at }}</div>
+</div>
+<br/>
+{% empty %}
+<p>No policy acknowledgments available.</p>
+{% endfor %}
+{% endblock %}

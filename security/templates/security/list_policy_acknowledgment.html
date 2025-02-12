@@ -1,0 +1,96 @@
+{% extends 'main/base.html' %}
+{% block title %}View Policies{% endblock %}
+{% block content %}
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <span{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    {% endfor %}
+{% endif %}
+<div class="container">
+<div class="row">
+    <div class="col">
+        <table class="table">
+            <thead>
+                <tr>
+                <th scope="col">Unacknowledged Policies</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for policy in unacknowledged_policies %}
+                <tr><td>
+                <div class="card mt-2">
+                    <div class="card-header text-end">Created by: <strong>{{ policy.created_by.first_name }} {{ policy.created_by.last_name }}</strong></div>
+                    <div class="card-body d-flex flex-row justify-content-between">
+                        <div class="card-title">
+                            <h5>{{ policy.title }}</h5>
+                            <span>Risks: </span>
+                            {% for risk in policy.risks.all %}
+                                <span class="badge rounded-pill {{risk.get_severity_display.lower}}-severity">{{risk.name}}</span>
+                            {% endfor %}
+                        </div>
+                        <div>
+                            <form method="post">
+                                {% csrf_token %}
+                                {% if perms.security.change_policyacknowledgment %}
+                                <button type="submit" class="btn btn-primary" name="policy-id-acknowledge" value="{{policy.id}}">Acknowledge</button>
+                                {% endif %}
+                                {% if perms.security.view_policyacknowledgment %}
+                                <button type="submit" class="btn btn-outline-primary" name="policy-id-view" value="{{policy.id}}">View</button>
+                                {% endif %}
+                            </form>
+                        </div>
+                    </div>
+                    <div class="card-footer">Created at: {{ policy.created_at }}</div>
+                    <div class="card-footer">Last Updated at: {{ policy.updated_at }}</div>
+                </div>
+                </td></tr>
+                {% empty %}
+                    <tr><td>No unacknowledged policies available.</td></tr>
+                {% endfor %}
+            </tbody>
+            </table>
+    </div>
+    <div class="col">
+        <table class="table">
+            <thead>
+                <tr>
+                <th scope="col">Acknowledged Policies</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for policy in acknowledged_policies %}
+                <tr><td>
+                <div class="card mt-2">
+                    <div class="card-header text-end">Created by: <strong>{{ policy.created_by.first_name }} {{ policy.created_by.last_name }}</strong></div>
+                    <div class="card-body d-flex flex-row justify-content-between">
+                        <div class="card-title">
+                            <h5>{{ policy.title }}</h5>
+                            <span>Risks: </span>
+                            {% for risk in policy.risks.all %}
+                                <span class="badge rounded-pill {{risk.get_severity_display.lower}}-severity">{{risk.name}}</span>
+                            {% endfor %}
+                        </div>
+                        <div>
+                            <form method="post">
+                                {% csrf_token %}
+                                {% if perms.security.view_policyacknowledgment %}
+                                <button type="submit" class="btn btn-outline-primary" name="policy-id-view" value="{{policy.id}}">View</button>
+                                {% endif %}
+                            </form>
+                        </div>
+                    </div>
+                    <div class="card-footer">Created at: {{ policy.created_at }}</div>
+                    <div class="card-footer">Last Updated at: {{ policy.updated_at }}</div>
+                </div>
+                </td></tr>
+                {% empty %}
+                    <tr><td>No acknowledged policies available.</td></tr>
+                {% endfor %}
+            </tbody>
+            </table>
+    </div>
+</div>
+{% endblock %}
