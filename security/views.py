@@ -3,6 +3,7 @@ from .forms import PolicyForm, RiskForm, PolicyVersionForm, ComplianceStandardFo
 from django.contrib.auth.decorators import login_required, permission_required
 from .models import Policy, Risk, PolicyVersion, ComplianceStandard, PolicyAcknowledgment
 from django.contrib import messages
+from .generate_excel import generatePolicyAcknowledgementReport
 
 # Create your views here.
 @login_required(login_url="/login")
@@ -302,4 +303,8 @@ def view_policy(request, pk):
 @permission_required("security.view_policyacknowledgment", login_url="/access-denied")
 def view_policy_acknowledgments(request, pk):
     policy_acknowledgments = PolicyAcknowledgment.objects.filter(policy = pk).order_by('-acknowledged_at')
-    return render(request, 'security/list_related_policy_acknowledgment.html', {"policy_acknowledgments": policy_acknowledgments})
+    return render(request, 'security/list_related_policy_acknowledgment.html', {"policy_acknowledgments": policy_acknowledgments, "policy": Policy.objects.filter(id=pk).first()})
+
+def download_ack_report(request, pk):
+    policy = Policy.objects.filter(id=pk).first()
+    return generatePolicyAcknowledgementReport(policy)

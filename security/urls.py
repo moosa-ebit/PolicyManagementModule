@@ -18,4 +18,5 @@ urlpatterns = [
     path('view-policy-acknowledgment', views.view_policy_acknowledgment, name='view_policy_acknowledgment'),
     path('view-policy/<int:pk>', views.view_policy, name='view_policy'),
     path('policy/<int:pk>/policy-acknowledgment-list', views.view_policy_acknowledgments, name='view_policy_acknowledgments'),
+    path('download-ack-report/<int:pk>', views.download_ack_report, name='download_ack_report'),
 ]
