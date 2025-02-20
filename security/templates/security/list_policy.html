@@ -37,6 +37,9 @@
                 <a class="btn btn-primary" href="{% url 'view_policy_versions' policy.pk %}">View Versions</a>
                 {% endif %}
                 {% if perms.security.view_policyacknowledgment %}
+                <a class="btn btn-outline-primary" href="{% url 'view_policy' policy.pk %}">View</a>
+                {% endif %}
+                {% if perms.security.view_policyacknowledgment %}
                 <a class="btn btn-outline-primary" href="{% url 'view_policy_acknowledgments' policy.pk %}">View Policy Acknowledgments</a>
                 {% endif %}
             </form>

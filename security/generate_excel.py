@@ -21,21 +21,19 @@ def adjustColumnWidth(worksheet):
 def generatePolicyAcknowledgementReport(policy: Policy):
     font_size = 11
     cell_font = Font(bold=True, size=font_size)
+    blue_fill = PatternFill(start_color='00B4D8', end_color='00B4D8', fill_type='solid')
+    
     acknowledgements = PolicyAcknowledgment.objects.filter(policy = policy)
     workbook = openpyxl.Workbook()
     sheet = workbook.active
     sheet.append(["Policy", policy.title])
     sheet.append([])
-    blue_fill = PatternFill(start_color='00B4D8', end_color='00B4D8', fill_type='solid')
     sheet['A1'].fill = blue_fill
     sheet['A1'].font = cell_font
     sheet.append(["First Name", "Last Name", "Time of Acknowledgment"])
-    sheet['A3'].fill = blue_fill
-    sheet['A3'].font = cell_font
-    sheet['B3'].fill = blue_fill
-    sheet['B3'].font = cell_font
-    sheet['C3'].fill = blue_fill
-    sheet['C3'].font = cell_font
+    for cell in ['A3', 'B3', 'C3']:
+        sheet[cell].fill = blue_fill
+        sheet[cell].font = cell_font
     for ack in acknowledgements:
         sheet.append([ack.user.first_name, ack.user.last_name, ack.acknowledged_at.strftime(("%d/%m/%Y %H:%M %p"))])
 
