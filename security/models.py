@@ -53,6 +53,16 @@ class Policy(models.Model):
     def __str__(self):
         return self.title
     
+    def submit(self):
+        if self.status == "DRAFT": self.status = "IN_REVIEW"
+        elif self.status == "IN_REVIEW": self.status = "APPROVED"
+        else: self.status = "ACTIVE"
+        self.save()
+    
+    def archive(self):
+        self.status = "ARCHIVED"
+        self.save()
+    
 class PolicyVersion(models.Model):
     policy = models.ForeignKey(Policy, on_delete=models.CASCADE)
     version_number = models.IntegerField(default=1)

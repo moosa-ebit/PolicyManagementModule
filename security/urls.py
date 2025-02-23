@@ -19,4 +19,6 @@ urlpatterns = [
     path('view-policy/<int:pk>', views.view_policy, name='view_policy'),
     path('policy/<int:pk>/policy-acknowledgment-list', views.view_policy_acknowledgments, name='view_policy_acknowledgments'),
     path('download-ack-report/<int:pk>', views.download_ack_report, name='download_ack_report'),
+    path('submit-policy/<int:pk>', views.submit_policy, name='submit_policy'),
+    path('archive-policy/<int:pk>', views.archive_policy, name='archive_policy'),
 ]

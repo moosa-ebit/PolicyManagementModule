@@ -2,6 +2,14 @@
 {% block title %}View Policy Version{% endblock %}
 {% load crispy_forms_tags %}
 {% block content %}
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <span{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    {% endfor %}
+{% endif %}
 <div class="form-group">
     <div class="mb-3">
         <label class="form-label">Title</label>
@@ -14,6 +22,10 @@
     <div class="mb-3">
         <label class="form-label">Version Number</label>
         <br/><span class="badge rounded-pill text-left version-badge">Version {{policy.version_number}}</span>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Status</label>
+        <input class="form-control" value="{{ policy.get_status_display }}" readonly>
     </div>
     <div class="mb-3">
         <label class="form-label">Risks</label><br/>
@@ -40,5 +52,17 @@
             </tbody>
           </table>
     </div>
+    {% if user.groups.all.0.name == 'Manager' %}
+        {% if policy.status != 'ACTIVE' %}
+            <div class="text-end">
+                <a class="btn btn-primary" href="{% url 'submit_policy' policy.pk %}">Submit</a>
+            </div>
+        {% endif %}
+        {% if policy.status == 'ACTIVE' %}
+            <div class="text-end">
+                <a class="btn btn-danger" href="{% url 'archive_policy' policy.pk %}">Archive</a>
+            </div>
+        {% endif %}
+    {% endif %}
 </div>
 {% endblock %}

@@ -289,8 +289,11 @@ def view_policy_acknowledgment(request):
             policy = Policy.objects.filter(id=policy_id_view).first()
             return redirect("view_policy", pk=policy.id)
 
-    acknowledged_policies = [policy_acknowledgment.policy for policy_acknowledgment in PolicyAcknowledgment.objects.filter(user = request.user)]
+    acknowledged_policies = []
+    for policy_acknowledgment in PolicyAcknowledgment.objects.filter(user = request.user):
+        if policy_acknowledgment.policy.status == 'ACTIVE': acknowledged_policies.append(policy_acknowledgment.policy)
     unacknowledged_policies = Policy.objects.exclude(id__in=[policy.id for policy in acknowledged_policies])
+    unacknowledged_policies = unacknowledged_policies.filter(status = 'ACTIVE')
     return render(request, 'security/list_policy_acknowledgment.html', {"unacknowledged_policies": unacknowledged_policies, "acknowledged_policies": acknowledged_policies})
 
 @login_required(login_url="/login")
@@ -308,3 +311,17 @@ def view_policy_acknowledgments(request, pk):
 def download_ack_report(request, pk):
     policy = Policy.objects.filter(id=pk).first()
     return generatePolicyAcknowledgementReport(policy)
+
+@permission_required("security.change_policy", login_url="/access-denied")
+def submit_policy(request, pk):
+    policy = Policy.objects.get(id=pk)
+    policy.submit()
+    messages.success(request, "Policy status has been updated successfully.")
+    return render(request, 'security/view_policy.html', {"policy": policy})
+
+@permission_required("security.change_policy", login_url="/access-denied")
+def archive_policy(request, pk):
+    policy = Policy.objects.get(id=pk)
+    policy.archive()
+    messages.success(request, "Policy status has been updated successfully.")
+    return render(request, 'security/view_policy.html', {"policy": policy})
